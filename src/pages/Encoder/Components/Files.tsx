@@ -33,12 +33,12 @@ const useConvertImageCallback = (file: TextureFile) => {
 
     React.useEffect(() => {
         file.onConverted = () => {
-            setConvertedFile(file.textureFileBlob);
+            setConvertedFile(file.basisTextureBlob);
             if (file.uncompressedTexturePreviewUrl) {
                 setUncompressedUrl(file.uncompressedTexturePreviewUrl);
             }
     
-            setConvertedFile(file.textureFileBlob);
+            setConvertedFile(file.basisTextureBlob);
 
             if (file.width !== null && file.height !== null) {
                 setImageWidth(file.width);
@@ -66,10 +66,10 @@ const useConvertImageCallback = (file: TextureFile) => {
 
 const useDownloadFileCallback = (file: TextureFile) => {
     return React.useCallback(() => {
-        if (!file.textureFileBlob) return;
+        if (!file.basisTextureBlob) return;
 
         const exportedFileName = file.file.name + '.basis';
-        download(exportedFileName, file.textureFileBlob);
+        download(exportedFileName, file.basisTextureBlob);
     }, [file]);
 }
 

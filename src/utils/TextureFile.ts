@@ -27,9 +27,13 @@ export class TextureFile {
     width: number | null = null;
     height: number | null = null;
     compressedTexturePreviewUrl: string | null = null;
-    previewFileBlob: Blob | null = null;
     uncompressedTexturePreviewUrl: string | null = null;
-    textureFileBlob: Uint8Array | null = null;
+    /** Original file, with a padding, which will fix the image size to 2^n. */
+    unCompressedPngBlob: Blob | null = null;
+    /** Convert the Basis texture to PNG, for preview purpose. */
+    compressedPngBlob: Blob | null = null;
+    /** The basis texture. */
+    basisTextureBlob: Uint8Array | null = null;
     
     onConverted: (() => void) | null = null;
 
@@ -37,32 +41,48 @@ export class TextureFile {
         this.file = file;
     }
 
-    async toBasis(params: Omit<LoadFileParams, 'sliceSourceImage'>, withObjectUrl: boolean = true) {
-        if (this.compressedTexturePreviewUrl) {
-            URL.revokeObjectURL(this.compressedTexturePreviewUrl);
+    async addPadding(withObjectUrl = true) {
+        if (this.unCompressedPngBlob) {
+            return {
+                imageBlob: this.unCompressedPngBlob!,
+                width: this.width!,
+                height: this.height!,
+                url: this.uncompressedTexturePreviewUrl,
+            }
         }
-        this.previewFileBlob = null;
 
         const fileUrl = URL.createObjectURL(this.file);
         const {imageBlob, width, height} = await loadImage(fileUrl);
+        this.width = width;
+        this.height = height;
         
         URL.revokeObjectURL(fileUrl);
 
-        const sliceArrayBuffer = new Uint8Array(await imageBlob.arrayBuffer());
-        const basisTexture = await encodePng({
-            ...params,
-            sliceSourceImage: sliceArrayBuffer,
-        });
-        
         const url = withObjectUrl ? URL.createObjectURL(imageBlob) : null;
 
         if (url) {
             this.uncompressedTexturePreviewUrl = url;
         }
 
-        this.textureFileBlob = basisTexture;
-        this.width = width;
-        this.height = height;
+        return { imageBlob, width, height }
+    }
+
+    async toBasis(params: Omit<LoadFileParams, 'sliceSourceImage'>, withObjectUrl: boolean = true) {
+        if (this.compressedTexturePreviewUrl) {
+            URL.revokeObjectURL(this.compressedTexturePreviewUrl);
+        }
+
+        this.compressedPngBlob = null;
+
+        const {imageBlob, width, height, url} = await this.addPadding(withObjectUrl);
+
+        const sliceArrayBuffer = new Uint8Array(await imageBlob.arrayBuffer());
+        const basisTexture = await encodePng({
+            ...params,
+            sliceSourceImage: sliceArrayBuffer,
+        });
+
+        this.basisTextureBlob = basisTexture;
 
         this.onConverted?.();
 
@@ -75,8 +95,8 @@ export class TextureFile {
         let blob: Blob
         let url: string | null = null
 
-        if (this.previewFileBlob) {
-            blob = this.previewFileBlob;
+        if (this.compressedPngBlob) {
+            blob = this.compressedPngBlob;
         } else {
             if (this.width === null || this.height === null) {
                 throw new NotConvertedError();
@@ -85,17 +105,17 @@ export class TextureFile {
             canvas.width = this.width;
             canvas.height = this.height;
     
-            if (!this.textureFileBlob) {
+            if (!this.basisTextureBlob) {
                 throw new NotConvertedError();
             }
     
-            await renderBasisTexture(this.textureFileBlob, canvas, renderer);
+            await renderBasisTexture(this.basisTextureBlob, canvas, renderer);
     
             blob = await new Promise<Blob>((resolve) => {
                 canvas.toBlob((blob) => resolve(blob!), 'image/png');
             });
     
-            this.previewFileBlob = blob;
+            this.compressedPngBlob = blob;
         }
 
         if (withObjectUrl) {

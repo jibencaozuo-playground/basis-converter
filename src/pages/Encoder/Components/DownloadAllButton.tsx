@@ -10,6 +10,8 @@ import { IconDownload } from './IconDownload';
 
 const packagingProgressAtom = atom(0);
 
+const COMPRESSION_PARAMETER =  { binary: true, compression: 'STORE' };
+
 const useDownloadAllCallback = () => {
     const [isPackaging, setIsPackaging] = React.useState(false);
     const [files] = useAtom(filesAtom);
@@ -23,21 +25,21 @@ const useDownloadAllCallback = () => {
         
         zip.file('DO_NOT_README.txt', 'meh');
 
-        console.log('Tasks:', files);
         for (let i = 0; i < files.length; i++) {
           setProgress(i / files.length);
           const file = files[i];
 
-          console.log('compressing:', file);
+          const { imageBlob } = await file.addPadding();
+          zip.file(file.file.name + '.original.png', imageBlob, COMPRESSION_PARAMETER);
 
-          if (!file.textureFileBlob) continue;
-          zip.file(file.file.name + '.basis', file.textureFileBlob, { binary: true });
+          if (!file.basisTextureBlob) continue;
+          zip.file(file.file.name + '.basis', file.basisTextureBlob, COMPRESSION_PARAMETER);
           
-          if (!file.previewFileBlob) {
+          if (!file.compressedPngBlob) {
             await file.generatePreview(false);
           } 
           
-          zip.file(file.file.name + '.preview.png', file.previewFileBlob!, { binary: true, compression: 'STORE' });
+          zip.file(file.file.name + '.preview.png', file.compressedPngBlob!, COMPRESSION_PARAMETER);
         }
         
         const generatedZip = await zip.generateAsync({type : 'uint8array'});
