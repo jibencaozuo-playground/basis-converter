@@ -29,7 +29,7 @@ const useConvertImageCallback = (file: TextureFile) => {
     const [imageWidth, setImageWidth] = React.useState<number>(0);
     const [imageHeight, setImageHeight] = React.useState<number>(0);
 
-    const convertParameters = useConvertParameters();
+    const { encodingParams, resizeParams } = useConvertParameters();
 
     React.useEffect(() => {
         file.onConverted = () => {
@@ -52,8 +52,8 @@ const useConvertImageCallback = (file: TextureFile) => {
     }, [file]);
 
     const convertFile = React.useCallback(async () => {
-        await file.toBasis(convertParameters);
-    }, [convertParameters, file]);
+        await file.toBasis(encodingParams, resizeParams);
+    }, [encodingParams, resizeParams, file]);
 
     return { 
         convertedFile, 

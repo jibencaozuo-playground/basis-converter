@@ -7,6 +7,7 @@ import { download } from 'utils/download';
 
 import { filesAtom } from './Uploader';
 import { IconDownload } from './IconDownload';
+import { useConvertParameters } from '../hooks/useConvertParameters';
 
 const packagingProgressAtom = atom(0);
 
@@ -16,6 +17,7 @@ const useDownloadAllCallback = () => {
     const [isPackaging, setIsPackaging] = React.useState(false);
     const [files] = useAtom(filesAtom);
     const [, setProgress] = useAtom(packagingProgressAtom);
+    const { resizeParams } = useConvertParameters();
 
     const downloadAll = React.useCallback(async () => {
         if (isPackaging) return;
@@ -29,7 +31,7 @@ const useDownloadAllCallback = () => {
           setProgress(i / files.length);
           const file = files[i];
 
-          const { imageBlob } = await file.addPadding();
+          const { imageBlob } = await file.addPadding(resizeParams);
           zip.file(file.file.name + '.original.png', imageBlob, COMPRESSION_PARAMETER);
 
           if (!file.basisTextureBlob) continue;
@@ -45,7 +47,7 @@ const useDownloadAllCallback = () => {
         const generatedZip = await zip.generateAsync({type : 'uint8array'});
         download('BasisPackage.zip', generatedZip);
         setIsPackaging(false);
-    }, [isPackaging, files, setProgress]);
+    }, [isPackaging, files, setProgress, resizeParams]);
 
     return [isPackaging, downloadAll] as const
 }

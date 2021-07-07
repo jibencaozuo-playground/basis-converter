@@ -1,7 +1,9 @@
 import { loadImage } from 'utils/loadImage';
+import type { ResizeParameter } from 'utils/loadImage';
 import { encodePng, renderBasisTexture } from 'utils/basisEncoder';
 import type { LoadFileParams } from 'utils/basisEncoder';
 import { Renderer } from 'utils/Renderer';
+import { AlignParameter } from 'utils/typings';
 
 const canvas = document.createElement('CANVAS') as HTMLCanvasElement;
 const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true })!;
@@ -35,13 +37,20 @@ export class TextureFile {
     /** The basis texture. */
     basisTextureBlob: Uint8Array | null = null;
     
+    resize: boolean | null = null;
+    verticalAlign: AlignParameter | null = null;
+    horizontalAlign: AlignParameter | null = null;
+
     onConverted: (() => void) | null = null;
 
     constructor(file: File) {
         this.file = file;
     }
 
-    async addPadding(withObjectUrl = true) {
+    async addPadding(
+        resizeParams: ResizeParameter,
+        withObjectUrl = true
+    ) {
         if (this.unCompressedPngBlob) {
             return {
                 imageBlob: this.unCompressedPngBlob!,
@@ -52,7 +61,7 @@ export class TextureFile {
         }
 
         const fileUrl = URL.createObjectURL(this.file);
-        const {imageBlob, width, height} = await loadImage(fileUrl);
+        const {imageBlob, width, height} = await loadImage(fileUrl, resizeParams);
         this.width = width;
         this.height = height;
         
@@ -67,14 +76,20 @@ export class TextureFile {
         return { imageBlob, width, height }
     }
 
-    async toBasis(params: Omit<LoadFileParams, 'sliceSourceImage'>, withObjectUrl: boolean = true) {
+    async toBasis(
+        params: Omit<LoadFileParams, 'sliceSourceImage'>, 
+        resizeParams: ResizeParameter, 
+        withObjectUrl: boolean = true
+    ) {
         if (this.compressedTexturePreviewUrl) {
             URL.revokeObjectURL(this.compressedTexturePreviewUrl);
         }
 
         this.compressedPngBlob = null;
 
-        const {imageBlob, width, height, url} = await this.addPadding(withObjectUrl);
+        const {imageBlob, width, height, url} = await this.addPadding(
+            resizeParams, withObjectUrl
+        );
 
         const sliceArrayBuffer = new Uint8Array(await imageBlob.arrayBuffer());
         const basisTexture = await encodePng({

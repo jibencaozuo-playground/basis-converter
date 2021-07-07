@@ -8,18 +8,36 @@ import { Checkbox } from 'baseui/checkbox';
 import { RadioGroup, Radio } from "baseui/radio";
 import { StatefulTooltip } from "baseui/tooltip";
 import { Label1 } from 'baseui/typography';
+import { Button } from 'baseui/button';
+import { ButtonGroup, MODE, SIZE } from 'baseui/button-group';
 
-import { sRGBAtom, mipmapAtom, modeAtom, ETC1SQualityAtom } from '../hooks/useConvertParameters';
+import { IconAlignTop } from './IconAlignTop';
+import { IconAlignVCenter } from './IconAlignVCenter';
+import { IconAlignBottom } from './IconAlignBottom';
+import { IconAlignLeft } from './IconAlignLeft';
+import { IconAlignHCenter } from './IconAlignHCenter';
+import { IconAlignRight } from './IconAlignRight';
+
+import { 
+    sRGBAtom, mipmapAtom, 
+    modeAtom, ETC1SQualityAtom, 
+    resizeAtom,
+    verticalAlignAtom, horizontalAlignAtom 
+} from '../hooks/useConvertParameters';
 
 export const Sidebar = () => {
     const [css] = useStyletron();
     const [sRGB, setSRGB] = useAtom(sRGBAtom);
     const [mipmap, setMipmap] = useAtom(mipmapAtom);
     const [mode, setMode] = useAtom(modeAtom);
-    const [, setETC1SQuality] = useAtom(ETC1SQualityAtom); 
+    const [, setETC1SQuality] = useAtom(ETC1SQualityAtom);
+    const [verticalAlign, setVerticalAlign] = useAtom(verticalAlignAtom);
+    const [resize, setResize] = useAtom(resizeAtom);
+    const [horizontalAlign, setHorizontalAlign] = useAtom(horizontalAlignAtom);
     const [ETC1SQualityCurrentValue, setETC1SQualityCurrentValue] = React.useState([1]);
 
     const bodyStyle = css({
+        overflowX: 'hidden',
         overflowY: 'auto',
         flexShrink: 1,
     });
@@ -42,11 +60,12 @@ export const Sidebar = () => {
     return (
         <Block className={bodyStyle}>
             <Block className={firstFormSectionStyle}>
+                <Label1>Parameters</Label1>
                 <Block className={formItemStyle}>
                     <StatefulTooltip 
                         returnFocus
                         autoFocus
-                        content="If checked, the input is assumed to be in sRGB space. Be sure to set this correctly! (Examples: True on photos, albedo/spec maps, and false on normal maps.)"
+                        content="If checked, the input is assumed to be in sRGB space. Be sure to set this correctly! (Examples: True on photos, albedo/spec maps, and false on normal maps)"
                     >
                         <Block>
                             <Checkbox
@@ -62,7 +81,7 @@ export const Sidebar = () => {
                     <StatefulTooltip 
                         returnFocus
                         autoFocus
-                        content={"If checked Mipmap will be generated from the source images."}
+                        content="If checked Mipmap will be generated from the source images."
                     >
                         <Block>
                             <Checkbox
@@ -76,7 +95,7 @@ export const Sidebar = () => {
                 </Block>
             </Block>
             <Block className={formSectionStyle}>
-                <Label1>Modes</Label1>
+                <Label1>Encoding</Label1>
                 <RadioGroup
                     value={mode}
                     onChange={(event) => setMode(event.currentTarget.value as any)}
@@ -109,6 +128,72 @@ export const Sidebar = () => {
                     </Block>
                 )
             }
+            <Block className={formSectionStyle}>
+                <Label1>Resize</Label1>
+                <Block className={formItemStyle}>
+                    <StatefulTooltip 
+                        returnFocus
+                        autoFocus
+                        content={() => <>This will resize your image size to 2<sup>n</sup>, which will make the texture works on PIXI.js.</>}
+                    >
+                        <Block>
+                            <Checkbox
+                                checked={resize}
+                                onChange={(event) => setResize(event.currentTarget.checked)}
+                            >
+                                Resize image
+                            </Checkbox>
+                        </Block>
+                    </StatefulTooltip>
+                </Block>
+                {
+                    resize && (
+                        <Block className={formSectionStyle}>
+                            <Label1>Alignment</Label1>
+                            <Block className={formItemStyle}>
+                                <ButtonGroup
+                                    size={SIZE.compact}
+                                    mode={MODE.radio}
+                                    selected={verticalAlign}
+                                    onClick={(_event, index) => {
+                                        setVerticalAlign(index);
+                                    }}
+                                    >
+                                    <Button startEnhancer={() =>  <IconAlignTop />}>
+                                        Top
+                                    </Button>
+                                    <Button startEnhancer={() =>  <IconAlignVCenter />}>
+                                        Center
+                                    </Button>
+                                    <Button startEnhancer={() => <IconAlignBottom />}>
+                                        Bottom
+                                    </Button>
+                                </ButtonGroup>
+                            </Block>
+                            <Block className={formItemStyle}>
+                                <ButtonGroup
+                                    size={SIZE.compact}
+                                    mode={MODE.radio}
+                                    selected={horizontalAlign}
+                                    onClick={(_event, index) => {
+                                        setHorizontalAlign(index);
+                                    }}
+                                    >
+                                    <Button startEnhancer={() =>  <IconAlignLeft />}>
+                                        Left
+                                    </Button>
+                                    <Button startEnhancer={() =>  <IconAlignHCenter />}>
+                                        Center
+                                    </Button>
+                                    <Button startEnhancer={() => <IconAlignRight />}>
+                                        Right
+                                    </Button>
+                                </ButtonGroup>
+                            </Block>
+                        </Block>
+                    )
+                }
+            </Block>
         </Block>
     )
 }

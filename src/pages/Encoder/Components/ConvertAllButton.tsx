@@ -13,19 +13,19 @@ const useConvertAllCallback = () => {
     const [, setConvertProgress] = useAtom(convertProgressAtom);
     const [isConverting, setIsConverting] = useAtom(isConvertingAtom);
     const [files] = useAtom(filesAtom);
-    const convertParameters = useConvertParameters();
+    const { encodingParams, resizeParams } = useConvertParameters();
 
     const convertAll = React.useCallback(async () => {
         setIsConverting(true);
 
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          await file.toBasis(convertParameters);
+          await file.toBasis(encodingParams, resizeParams);
           setConvertProgress(i / files.length);
         }
 
         setIsConverting(false);
-    }, [files, setConvertProgress, setIsConverting, convertParameters]);
+    }, [files, setConvertProgress, setIsConverting, encodingParams, resizeParams]);
 
     return [isConverting, convertAll] as const
 }
