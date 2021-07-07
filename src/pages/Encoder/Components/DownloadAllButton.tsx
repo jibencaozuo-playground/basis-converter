@@ -30,18 +30,18 @@ const useDownloadAllCallback = () => {
         for (let i = 0; i < files.length; i++) {
           setProgress(i / files.length);
           const file = files[i];
-
+          const name = file.file.name.replace(/\.[^.]*$/, '');
           const { imageBlob } = await file.addPadding(resizeParams);
-          zip.file(file.file.name + '.original.png', imageBlob, COMPRESSION_PARAMETER);
+          zip.file(`original/${name}.png`, imageBlob, COMPRESSION_PARAMETER);
 
           if (!file.basisTextureBlob) continue;
-          zip.file(file.file.name + '.basis', file.basisTextureBlob, COMPRESSION_PARAMETER);
+          zip.file(`basis/${name}.basis`, file.basisTextureBlob, COMPRESSION_PARAMETER);
           
           if (!file.compressedPngBlob) {
             await file.generatePreview(false);
           } 
           
-          zip.file(file.file.name + '.preview.png', file.compressedPngBlob!, COMPRESSION_PARAMETER);
+          zip.file(`preview/${name}.png`, file.compressedPngBlob!, COMPRESSION_PARAMETER);
         }
         
         const generatedZip = await zip.generateAsync({type : 'uint8array'});
