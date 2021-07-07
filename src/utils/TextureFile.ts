@@ -3,7 +3,6 @@ import type { ResizeParameter } from 'utils/loadImage';
 import { encodePng, renderBasisTexture } from 'utils/basisEncoder';
 import type { LoadFileParams } from 'utils/basisEncoder';
 import { Renderer } from 'utils/Renderer';
-import { AlignParameter } from 'utils/typings';
 
 const canvas = document.createElement('CANVAS') as HTMLCanvasElement;
 const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true })!;
@@ -36,10 +35,6 @@ export class TextureFile {
     compressedPngBlob: Blob | null = null;
     /** The basis texture. */
     basisTextureBlob: Uint8Array | null = null;
-    
-    resize: boolean | null = null;
-    verticalAlign: AlignParameter | null = null;
-    horizontalAlign: AlignParameter | null = null;
 
     onConverted: (() => void) | null = null;
 
