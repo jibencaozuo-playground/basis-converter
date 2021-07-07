@@ -30,7 +30,7 @@ const useDownloadAllCallback = () => {
         for (let i = 0; i < files.length; i++) {
           setProgress(i / files.length);
           const file = files[i];
-          const name = file.file.name.replace(/\.[^.]*$/,"")
+          const name = file.file.name.replace(/\.[^.]*$/, '');
           const { imageBlob } = await file.addPadding(resizeParams);
           zip.file(`original/${name}.png`, imageBlob, COMPRESSION_PARAMETER);
 
