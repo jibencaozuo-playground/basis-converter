@@ -1,6 +1,6 @@
 import { loadImage } from 'utils/loadImage';
 import type { ResizeParameter } from 'utils/loadImage';
-import { encodePng, renderBasisTexture } from 'utils/basisEncoder';
+import { encodePngToTexture, renderBasisTexture, renderKtx2Texture } from 'utils/basisEncoder';
 import type { LoadFileParams } from 'utils/basisEncoder';
 import { Renderer } from 'utils/Renderer';
 
@@ -27,6 +27,7 @@ export class TextureFile {
     file: File;
     width: number | null = null;
     height: number | null = null;
+    container: 'BASIS' | 'KTX2' | null = null;
     compressedTexturePreviewUrl: string | null = null;
     uncompressedTexturePreviewUrl: string | null = null;
     /** Original file, with a padding, which will fix the image size to 2^n. */
@@ -71,7 +72,7 @@ export class TextureFile {
         return { imageBlob, width, height }
     }
 
-    async toBasis(
+    async toTexture(
         params: Omit<LoadFileParams, 'sliceSourceImage'>, 
         resizeParams: ResizeParameter, 
         withObjectUrl: boolean = true
@@ -87,12 +88,13 @@ export class TextureFile {
         );
 
         const sliceArrayBuffer = new Uint8Array(await imageBlob.arrayBuffer());
-        const basisTexture = await encodePng({
+        const basisTexture = await encodePngToTexture({
             ...params,
             sliceSourceImage: sliceArrayBuffer,
         });
 
         this.basisTextureBlob = basisTexture;
+        this.container = params.container;
 
         this.onConverted?.();
 
@@ -119,7 +121,16 @@ export class TextureFile {
                 throw new NotConvertedError();
             }
     
-            await renderBasisTexture(this.basisTextureBlob, canvas, renderer);
+            switch (this.container) {
+                case 'BASIS':
+                    await renderBasisTexture(this.basisTextureBlob, canvas, renderer);
+                    break;
+                case 'KTX2':
+                    await renderKtx2Texture(this.basisTextureBlob, canvas, renderer);
+                    break;
+                default:
+                    throw new NotConvertedError();
+            }
     
             blob = await new Promise<Blob>((resolve) => {
                 canvas.toBlob((blob) => resolve(blob!), 'image/png');

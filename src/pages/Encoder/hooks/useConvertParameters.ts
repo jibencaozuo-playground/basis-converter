@@ -3,6 +3,7 @@ import { atom, useAtom } from 'jotai';
 
 import { AlignParameter } from 'utils/typings';
 
+export const containerAtom = atom<'BASIS' | 'KTX2'>('BASIS');
 export const sRGBAtom = atom(false);
 export const mipmapAtom = atom(true);
 export const modeAtom = atom<'UASTC' | 'ETC1S'>('ETC1S');
@@ -12,6 +13,7 @@ export const verticalAlignAtom = atom(AlignParameter.Center);
 export const horizontalAlignAtom = atom(AlignParameter.Center);
 
 export const useConvertParameters = () => {
+    const [container] = useAtom(containerAtom);
     const [sRGB] = useAtom(sRGBAtom);
     const [mipmap] = useAtom(mipmapAtom);
     const [mode] = useAtom(modeAtom);
@@ -21,12 +23,13 @@ export const useConvertParameters = () => {
     const [horizontalAlign] = useAtom(horizontalAlignAtom);
 
     const encodingParams =  React.useMemo(() => ({
+        container,
         quality: ETC1SQuality,
         uastc: mode === 'UASTC',
         debug: false,
         sRGB,
         mipmap,
-    }), [sRGB, mipmap, mode, ETC1SQuality]);
+    }), [container, sRGB, mipmap, mode, ETC1SQuality]);
 
     const resizeParams = React.useMemo(() => ({
         resize, verticalAlign, horizontalAlign

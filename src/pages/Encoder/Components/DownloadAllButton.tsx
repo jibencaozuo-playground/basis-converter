@@ -35,7 +35,11 @@ const useDownloadAllCallback = () => {
           zip.file(`original/${name}.png`, imageBlob, COMPRESSION_PARAMETER);
 
           if (!file.basisTextureBlob) continue;
-          zip.file(`basis/${name}.basis`, file.basisTextureBlob, COMPRESSION_PARAMETER);
+          zip.file(
+            `basis/${name}.${file.container === 'BASIS' ? 'basis' : 'ktx2'}`, 
+            file.basisTextureBlob, 
+            COMPRESSION_PARAMETER
+          );
           
           if (!file.compressedPngBlob) {
             await file.generatePreview(false);

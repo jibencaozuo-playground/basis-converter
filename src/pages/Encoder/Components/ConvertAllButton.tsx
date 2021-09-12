@@ -20,7 +20,7 @@ const useConvertAllCallback = () => {
 
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          await file.toBasis(encodingParams, resizeParams);
+          await file.toTexture(encodingParams, resizeParams);
           setConvertProgress(i / files.length);
         }
 

@@ -52,7 +52,7 @@ const useConvertImageCallback = (file: TextureFile) => {
     }, [file]);
 
     const convertFile = React.useCallback(async () => {
-        await file.toBasis(encodingParams, resizeParams);
+        await file.toTexture(encodingParams, resizeParams);
     }, [encodingParams, resizeParams, file]);
 
     return { 
@@ -68,7 +68,9 @@ const useDownloadFileCallback = (file: TextureFile) => {
     return React.useCallback(() => {
         if (!file.basisTextureBlob) return;
 
-        const exportedFileName = file.file.name + '.basis';
+        const ext = file.container === 'BASIS' ? '.basis' : '.ktx2';
+
+        const exportedFileName = file.file.name + ext;
         download(exportedFileName, file.basisTextureBlob);
     }, [file]);
 }

@@ -30,7 +30,8 @@ const BASIS_FORMAT = {
     cTFETC2_EAC_RG11: 21	
 };
 
-export interface LoadFileParams { 
+export interface LoadFileParams {
+    container: 'BASIS' | 'KTX2';
     sliceSourceImage: Uint8Array;
     quality: number;
     uastc: boolean;
@@ -55,7 +56,7 @@ const pvrtcSupported = !!(gl.getExtension('WEBGL_compressed_texture_pvrtc'))
         || !!(gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc'));
 const bc7Supported = !!gl.getExtension('EXT_texture_compression_bptc');
 
-export const encodePng = async (params: LoadFileParams) => {
+export const encodePngToTexture = async (params: LoadFileParams) => {
     const { BasisEncoder, initializeBasis } = await Module;
         
     initializeBasis();
@@ -73,6 +74,12 @@ export const encodePng = async (params: LoadFileParams) => {
 
     const qualityLevel = params.quality;
     const uastcFlag = params.uastc;
+
+    if (params.container === 'KTX2') {
+        basisEncoder.setCreateKTX2File(true);
+        basisEncoder.setKTX2UASTCSupercompression(true);
+        basisEncoder.setKTX2SRGBTransferFunc(true);
+    }
     
     basisEncoder.setSliceSourceImage(0, params.sliceSourceImage, 0, 0, true);
     basisEncoder.setDebug(params.debug);
@@ -95,7 +102,7 @@ export const encodePng = async (params: LoadFileParams) => {
     
     log('encoding time', elapsed.toFixed(2));
     
-    const encodedBasisFile = new Uint8Array(basisFileData.buffer, 0, num_output_bytes);
+    const encodedTextureFile = new Uint8Array(basisFileData.buffer, 0, num_output_bytes);
 
     basisEncoder.delete();
        
@@ -104,7 +111,7 @@ export const encodePng = async (params: LoadFileParams) => {
     } else {
         log('encodeBasisTexture() succeeded, output size ' + num_output_bytes);
         
-        return encodedBasisFile
+        return encodedTextureFile
     }
 }
 

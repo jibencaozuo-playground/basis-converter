@@ -7,7 +7,7 @@ import { Slider } from "baseui/slider";
 import { Checkbox } from 'baseui/checkbox';
 import { RadioGroup, Radio } from "baseui/radio";
 import { StatefulTooltip } from "baseui/tooltip";
-import { Label1 } from 'baseui/typography';
+import { Label1, Paragraph4 } from 'baseui/typography';
 import { Button } from 'baseui/button';
 import { ButtonGroup, MODE, SIZE } from 'baseui/button-group';
 
@@ -19,14 +19,16 @@ import { IconAlignHCenter } from './IconAlignHCenter';
 import { IconAlignRight } from './IconAlignRight';
 
 import { 
+    containerAtom,
     sRGBAtom, mipmapAtom, 
     modeAtom, ETC1SQualityAtom, 
     resizeAtom,
-    verticalAlignAtom, horizontalAlignAtom 
+    verticalAlignAtom, horizontalAlignAtom,
 } from '../hooks/useConvertParameters';
 
 export const Sidebar = () => {
     const [css] = useStyletron();
+    const [container, setContaner] = useAtom(containerAtom);
     const [sRGB, setSRGB] = useAtom(sRGBAtom);
     const [mipmap, setMipmap] = useAtom(mipmapAtom);
     const [mode, setMode] = useAtom(modeAtom);
@@ -60,6 +62,27 @@ export const Sidebar = () => {
     return (
         <Block className={bodyStyle}>
             <Block className={firstFormSectionStyle}>
+                <Label1>Container</Label1>
+                <Paragraph4>The texture produced by these two options will not differ in any essential way. KTX2 is just a container, and the texture inside it is still encoded with BASIS.</Paragraph4>
+                <Block className={formItemStyle}>
+                    <RadioGroup
+                        value={container}
+                        onChange={(event) => setContaner(event.currentTarget.value as any)}
+                    >
+                        <Radio 
+                            value="BASIS"
+                            description="Bare texture."
+                        >
+                            BASIS
+                        </Radio>
+                        <Radio
+                            value="KTX2"
+                            description="With a KTX2 container."
+                        >
+                            KTX2
+                        </Radio>
+                    </RadioGroup>
+                </Block>
                 <Label1>Parameters</Label1>
                 <Block className={formItemStyle}>
                     <StatefulTooltip 
