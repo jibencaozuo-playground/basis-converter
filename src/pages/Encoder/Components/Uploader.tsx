@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { atom, useAtom } from 'jotai';
 
+import { Block } from 'baseui/block';
 import { FileUploader } from 'baseui/file-uploader';
 
 import { TextureFile } from 'utils/TextureFile';
@@ -14,15 +14,17 @@ export const Uploader = () => {
     const [isConverting, ] = useAtom(isConvertingAtom);
 
     return (
-        <FileUploader
-            accept="image/*"
-            disabled={isConverting}
-            onDrop={(acceptedFiles) => {
-                setFiles([
-                    ...files, 
-                    ...acceptedFiles.map((file) => new TextureFile(file))
-                ]);
-            }}
-        />
+        <Block paddingRight="12px">
+            <FileUploader
+                accept="image/*"
+                disabled={isConverting}
+                onDrop={(acceptedFiles) => {
+                    setFiles([
+                        ...files, 
+                        ...acceptedFiles.map((file) => new TextureFile(file))
+                    ]);
+                }}
+            />
+        </Block>
     );
 }

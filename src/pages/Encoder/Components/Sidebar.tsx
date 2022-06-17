@@ -6,8 +6,7 @@ import { Block } from 'baseui/block';
 import { Slider } from "baseui/slider";
 import { Checkbox } from 'baseui/checkbox';
 import { RadioGroup, Radio } from "baseui/radio";
-import { StatefulTooltip } from "baseui/tooltip";
-import { Label1, Paragraph4 } from 'baseui/typography';
+import { Label1, Label2, Paragraph3, Paragraph4 } from 'baseui/typography';
 import { Button } from 'baseui/button';
 import { ButtonGroup, MODE, SIZE } from 'baseui/button-group';
 
@@ -22,7 +21,7 @@ import {
     containerAtom,
     sRGBAtom, mipmapAtom, 
     modeAtom, ETC1SQualityAtom, 
-    resizeAtom,
+    resizeAtom, atlasAtom, atlasAllowFlippingAtom, atlasMaxSizeAtom,
     verticalAlignAtom, horizontalAlignAtom,
 } from '../hooks/useConvertParameters';
 
@@ -33,15 +32,22 @@ export const Sidebar = () => {
     const [mipmap, setMipmap] = useAtom(mipmapAtom);
     const [mode, setMode] = useAtom(modeAtom);
     const [, setETC1SQuality] = useAtom(ETC1SQualityAtom);
-    const [verticalAlign, setVerticalAlign] = useAtom(verticalAlignAtom);
-    const [resize, setResize] = useAtom(resizeAtom);
-    const [horizontalAlign, setHorizontalAlign] = useAtom(horizontalAlignAtom);
     const [ETC1SQualityCurrentValue, setETC1SQualityCurrentValue] = React.useState([1]);
+    const [resize, setResize] = useAtom(resizeAtom);
+    const [verticalAlign, setVerticalAlign] = useAtom(verticalAlignAtom);
+    const [horizontalAlign, setHorizontalAlign] = useAtom(horizontalAlignAtom);
+    const [atlas, setAtlas] = useAtom(atlasAtom);
+    const [atlasAllowFlipping, setAtlasAllowFlipping] = useAtom(atlasAllowFlippingAtom);
+    const [atlasMaxSizeCurrentValue, setAtlasMaxSizeCurrentValue] = React.useState([2048]);
+    const [atlasMaxSize, setAtlasMaxSize] = useAtom(atlasMaxSizeAtom);
+
 
     const bodyStyle = css({
         overflowX: 'hidden',
         overflowY: 'auto',
         flexShrink: 1,
+        paddingTop: '20px',
+        marginBottom: '20px',
     });
 
     const formSectionStyle = css({
@@ -57,6 +63,11 @@ export const Sidebar = () => {
     const formItemStyle = css({
         marginTop: '12px',
         marginBottom: '12px',
+    });
+
+    const checkboxSubtitleStyle = css({
+        marginTop: '2px',
+        paddingLeft: '32px',
     });
 
     return (
@@ -85,36 +96,29 @@ export const Sidebar = () => {
                 </Block>
                 <Label1>Parameters</Label1>
                 <Block className={formItemStyle}>
-                    <StatefulTooltip 
-                        returnFocus
-                        autoFocus
-                        content="If checked, the input is assumed to be in sRGB space. Be sure to set this correctly! (Examples: True on photos, albedo/spec maps, and false on normal maps)"
-                    >
-                        <Block>
-                            <Checkbox
-                                checked={sRGB}
-                                onChange={(event) => setSRGB(event.currentTarget.checked)}
-                            >
-                                sRGB Mode
-                            </Checkbox>
-                        </Block>
-                    </StatefulTooltip>
+                    <Block>
+                        <Checkbox
+                            checked={sRGB}
+                            onChange={(event) => setSRGB(event.currentTarget.checked)}
+                        >
+                            sRGB Mode
+                        </Checkbox>
+                        
+                        <Paragraph3 className={checkboxSubtitleStyle} color={['contentSecondary']}>
+                            If checked, the input is assumed to be in sRGB space. Be sure to set this correctly! (Examples: True on photos, albedo/spec maps, and false on normal maps)
+                        </Paragraph3>
+                    </Block>
                 </Block>
                 <Block className={formItemStyle}>
-                    <StatefulTooltip 
-                        returnFocus
-                        autoFocus
-                        content="If checked Mipmap will be generated from the source images."
+                    <Checkbox
+                        checked={mipmap}
+                        onChange={(event) => setMipmap(event.currentTarget.checked)}
                     >
-                        <Block>
-                            <Checkbox
-                                checked={mipmap}
-                                onChange={(event) => setMipmap(event.currentTarget.checked)}
-                            >
-                                Generate Mipmap
-                            </Checkbox>
-                        </Block>
-                    </StatefulTooltip>
+                        Generate Mipmap
+                    </Checkbox>
+                    <Paragraph3 className={checkboxSubtitleStyle} color={['contentSecondary']}>
+                        If checked Mipmap will be generated from the source images.
+                    </Paragraph3>
                 </Block>
             </Block>
             <Block className={formSectionStyle}>
@@ -154,20 +158,17 @@ export const Sidebar = () => {
             <Block className={formSectionStyle}>
                 <Label1>Resize</Label1>
                 <Block className={formItemStyle}>
-                    <StatefulTooltip 
-                        returnFocus
-                        autoFocus
-                        content={() => <>This will resize your image size to 2<sup>n</sup>, which will make the texture works on PIXI.js.</>}
-                    >
-                        <Block>
-                            <Checkbox
-                                checked={resize}
-                                onChange={(event) => setResize(event.currentTarget.checked)}
-                            >
-                                Resize image
-                            </Checkbox>
-                        </Block>
-                    </StatefulTooltip>
+                    <Block>
+                        <Checkbox
+                            checked={resize}
+                            onChange={(event) => setResize(event.currentTarget.checked)}
+                        >
+                            Resize image
+                        </Checkbox>
+                    </Block>
+                    <Paragraph3 className={checkboxSubtitleStyle} color={['contentSecondary']}>
+                        This will resize your image size to 2<sup>n</sup>, which will make the texture works on PIXI.js.
+                    </Paragraph3>
                 </Block>
                 {
                     resize && (
@@ -213,6 +214,60 @@ export const Sidebar = () => {
                                     </Button>
                                 </ButtonGroup>
                             </Block>
+                        </Block>
+                    )
+                }
+            </Block>
+            <Block className={formSectionStyle}>
+                <Label1>Atlas</Label1>
+                <Block className={formItemStyle}>
+                    <Checkbox
+                        checked={atlas}
+                        onChange={(event) => setAtlas(event.currentTarget.checked)}
+                    >
+                        Generate Atlas
+                    </Checkbox>
+                    <Paragraph3 className={checkboxSubtitleStyle} color={['contentSecondary']}>
+                        To improve load performance and reduce memory usage.
+                    </Paragraph3>
+                </Block>
+                {
+                    atlas && (
+                        <Block className={formSectionStyle}>
+                            <Block className={formItemStyle}>
+                                <Label1>Atlas Parameters</Label1>
+                                <Block className={formItemStyle}>
+                                    <Checkbox
+                                        checked={atlasAllowFlipping}
+                                        onChange={(event) => setAtlasAllowFlipping(event.currentTarget.checked)}
+                                    >
+                                        Allow Flipping
+                                    </Checkbox>
+                                    <Paragraph3 className={checkboxSubtitleStyle} color={['contentSecondary']}>
+                                        If the algorithm will try to flip rectangles to better fit them.
+                                    </Paragraph3>
+                                </Block>
+                            </Block>
+                                <Label2>Max Side Size</Label2>
+                                <Block className={formItemStyle}>
+                                    <Slider 
+                                        min={1}
+                                        max={4096}
+                                        value={atlasMaxSizeCurrentValue} 
+                                        onChange={(event) => setAtlasMaxSizeCurrentValue(event.value)} 
+                                        onFinalChange={(event) => setAtlasMaxSize(event.value[0])} 
+                                    />
+                                </Block>
+                                {
+                                    atlasMaxSize > 2048 && (
+                                        <Paragraph3 color={['negative']}>
+                                            The maximum atlas space size should not exceed 2048 or the texture might not be displayed correctly on some mobile device. 
+                                        </Paragraph3>
+                                    )
+                                }
+                                <Paragraph3 color={['contentSecondary']}>
+                                    If the algorithm will try to flip rectangles to better fit them.
+                                </Paragraph3>
                         </Block>
                     )
                 }

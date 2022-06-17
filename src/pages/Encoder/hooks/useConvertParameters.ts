@@ -9,6 +9,9 @@ export const mipmapAtom = atom(true);
 export const modeAtom = atom<'UASTC' | 'ETC1S'>('ETC1S');
 export const ETC1SQualityAtom = atom(1);
 export const resizeAtom = atom(true);
+export const atlasAtom = atom(false);
+export const atlasAllowFlippingAtom = atom(true);
+export const atlasMaxSizeAtom = atom(2048);
 export const verticalAlignAtom = atom(AlignParameter.Center);
 export const horizontalAlignAtom = atom(AlignParameter.Center);
 
@@ -19,6 +22,9 @@ export const useConvertParameters = () => {
     const [mode] = useAtom(modeAtom);
     const [ETC1SQuality] = useAtom(ETC1SQualityAtom);
     const [resize] = useAtom(resizeAtom);
+    const [atlas] = useAtom(atlasAtom);
+    const [atlasAllowFlipping] = useAtom(atlasAllowFlippingAtom);
+    const [atlasMaxSize] = useAtom(atlasMaxSizeAtom);
     const [verticalAlign] = useAtom(verticalAlignAtom);
     const [horizontalAlign] = useAtom(horizontalAlignAtom);
 
@@ -29,7 +35,14 @@ export const useConvertParameters = () => {
         debug: false,
         sRGB,
         mipmap,
-    }), [container, sRGB, mipmap, mode, ETC1SQuality]);
+        atlas,
+        atlasAllowFlipping,
+        atlasMaxSize,
+    }), 
+    [
+        container, sRGB, mipmap, mode, ETC1SQuality, 
+        atlas, atlasAllowFlipping, atlasMaxSize,
+    ]);
 
     const resizeParams = React.useMemo(() => ({
         resize, verticalAlign, horizontalAlign
