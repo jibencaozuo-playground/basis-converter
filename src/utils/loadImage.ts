@@ -12,23 +12,26 @@ export interface ResizeParameter {
     horizontalAlign: AlignParameter | null;
 }
 
-export const loadImage = async (url: string, resizeParams: ResizeParameter) => {
+export const createImageElement = async (url: string) => {
     const image = new Image();
     image.src = url;
     
-    await new Promise<void>((resolve) => {
+    return new Promise<HTMLImageElement>((resolve) => {
         image.onload = () => {
-            resolve()
+            resolve(image);
         }
     });
+}
+export const loadImage = async (url: string, resizeParams: ResizeParameter, fileName?: string) => {
+    const image = await createImageElement(url);
 
     const { resize, verticalAlign, horizontalAlign } = resizeParams;
 
-    const canvasWidth = resize ? Math.pow(2, Math.ceil(Math.log2(image.width))) : image.width
-    const canvasHeight = resize ? Math.pow(2, Math.ceil(Math.log2(image.height))): image.height
+    const canvasWidth = resize ? Math.pow(2, Math.ceil(Math.log2(image.width))) : image.width;
+    const canvasHeight = resize ? Math.pow(2, Math.ceil(Math.log2(image.height))): image.height;
 
-    let paintX = 0
-    let paintY = 0
+    let paintX = 0;
+    let paintY = 0;
 
     switch (verticalAlign) {
         case AlignParameter.Start:
@@ -54,16 +57,16 @@ export const loadImage = async (url: string, resizeParams: ResizeParameter) => {
             break;
     }
 
-    const canvas = document.createElement('CANVAS') as HTMLCanvasElement
-    canvas.width = canvasWidth
-    canvas.height = canvasHeight
+    const canvas = document.createElement('CANVAS') as HTMLCanvasElement;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
     const context = canvas.getContext('2d')!
     context.drawImage(
         image, 
         paintX, 
         paintY
-    )
+    );
 
     const imageBlob = await new Promise<Blob>((resolve) => {
         canvas.toBlob(
@@ -74,7 +77,13 @@ export const loadImage = async (url: string, resizeParams: ResizeParameter) => {
             }, 
         'image/png'
         )
-    })
+    });
 
-    return { imageBlob, width: canvasWidth, height: canvasHeight }
+    return { 
+        imageBlob, 
+        $image: image,
+        width: canvasWidth,
+        height: canvasHeight,
+        fileName: fileName ?? Math.random().toString(36).substring(2, 15) + '.png'
+    };
 }

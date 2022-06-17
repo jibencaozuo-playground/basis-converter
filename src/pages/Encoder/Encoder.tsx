@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useStyletron } from 'baseui';
 
 import { FlexGrid, FlexGridItem } from 'baseui/flex-grid';

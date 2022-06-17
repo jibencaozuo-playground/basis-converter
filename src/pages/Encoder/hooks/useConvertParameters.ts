@@ -35,12 +35,16 @@ export const useConvertParameters = () => {
         debug: false,
         sRGB,
         mipmap,
+    }), 
+    [
+        container, sRGB, mipmap, mode, ETC1SQuality
+    ]);
+
+    const atlasParams = React.useMemo(() => ({
         atlas,
         atlasAllowFlipping,
         atlasMaxSize,
-    }), 
-    [
-        container, sRGB, mipmap, mode, ETC1SQuality, 
+    }), [
         atlas, atlasAllowFlipping, atlasMaxSize,
     ]);
 
@@ -48,5 +52,5 @@ export const useConvertParameters = () => {
         resize, verticalAlign, horizontalAlign
     }), [resize, verticalAlign, horizontalAlign]);
 
-    return { encodingParams, resizeParams }
+    return { encodingParams, resizeParams, atlasParams }
 }

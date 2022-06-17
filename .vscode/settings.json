@@ -8,6 +8,8 @@
         "RESAMPLER",
         "Supercompression",
         "UASTC",
-        "userdata"
+        "userdata",
+        "XYWH",
+        "Xywhf"
     ]
 }
