@@ -12,6 +12,22 @@ export enum BinDimension {
   HEIGHT,
 }
 
+// This function will do a binary search on viable bin sizes,
+// starting from the biggest one: starting_bin.
+
+// The search stops when the bin was successfully inserted into,
+// AND the bin size to be tried next differs in size from the last
+// viable one by *less* then discard_step.
+
+// If we could not insert all input rectangles into a bin even as
+// big as the starting_bin - the search fails.
+// In this case, we return the amount of space (total_area_type)
+// inserted in total.
+
+// If we've found a viable bin that is smaller or equal to
+// starting_bin, the search succeeds.
+// In this case, we return the viable bin (rect_wh).
+
 export function bestPackingForOrderingImpl(
   root: EmptySpaces,
   ordering: OutputRectType[],
@@ -131,20 +147,20 @@ export function bestPackingForOrdering(
   );
 
   const bestResult = tryPack(BinDimension.BOTH, startingBin);
-  const failed = typeof bestResult === 'number'; // as totalAreaType;
+  const failed = typeof bestResult === 'number';
   if (failed) {
     return bestResult;
   }
 
-  let bestBin = bestResult as RectWh;
+  let bestBin: RectWh = bestResult;
   const trial = (localTriedDimension: BinDimension) => {
     if (typeof bestBin === 'number') {
       throw new Error('bestBin should not be a number');
     }
 
-    const localTrial = tryPack(localTriedDimension, bestBin as RectWh);
-    const better = localTrial as RectWh;
-    if (localTrial) {
+    const localTrial = tryPack(localTriedDimension, bestBin);
+    const better = localTrial;
+    if (typeof better !== 'number') {
       bestBin = better;
     }
   };

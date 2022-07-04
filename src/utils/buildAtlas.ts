@@ -91,15 +91,18 @@ export const buildAtlas = async (
         );
 
         if (!taskSuccess) {
+            console.log('Task failed, trying again.');
             const lastTask = currentTask.pop();
-
+            
             if (lastTask) {
                 nextTask.unshift(lastTask);
             }
-
+            
             runTasks();
             return;
         }
+
+        console.log('Task success, packing');
 
         const $canvas = document.createElement('canvas');
         $canvas.width = findBestPackingResult.w;

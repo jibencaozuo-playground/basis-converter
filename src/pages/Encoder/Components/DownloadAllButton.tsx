@@ -33,9 +33,11 @@ const useDownloadAllCallback = () => {
         zip.file('DO_NOT_README.txt', 'meh');
 
         for (let i = 0; i < files.length; i++) {
+          console.log(`Zipping files ${i}/${files.length}`);
           setProgress(i / files.length);
           const file = files[i];
           const name = file.file.name.replace(/\.[^.]*$/, '');
+
           const { imageBlob } = await file.addPadding(resizeParams);
           zip.file(`original/${name}.png`, imageBlob, COMPRESSION_PARAMETER);
 
@@ -54,6 +56,7 @@ const useDownloadAllCallback = () => {
         }
 
         if (atlasParams.atlas) {
+          console.log('Packing atlas');
           const {
             canvases,
             metadata,
