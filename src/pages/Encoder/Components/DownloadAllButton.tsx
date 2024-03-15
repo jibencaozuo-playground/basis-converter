@@ -39,20 +39,20 @@ const useDownloadAllCallback = () => {
           const name = file.file.name.replace(/\.[^.]*$/, '');
 
           const { imageBlob } = await file.addPadding(resizeParams);
-          zip.file(`original/${name}.png`, imageBlob, COMPRESSION_PARAMETER);
+          zip.file(`original/${name}.png`, imageBlob);
 
           if (!file.basisTextureBlob) continue;
           zip.file(
             `basis/${name}.${file.container === 'BASIS' ? 'basis' : 'ktx2'}`, 
             file.basisTextureBlob, 
-            COMPRESSION_PARAMETER
+          
           );
           
           if (!file.compressedPngBlob) {
             await file.generatePreview(false);
           } 
           
-          zip.file(`preview/${name}.png`, file.compressedPngBlob!, COMPRESSION_PARAMETER);
+          zip.file(`preview/${name}.png`, file.compressedPngBlob!);
         }
 
         if (atlasParams.atlas) {
@@ -78,10 +78,9 @@ const useDownloadAllCallback = () => {
 
             zip.file(
               `atlas/atlas-${i}.png`,
-              blob as Blob,
-              COMPRESSION_PARAMETER
+              blob as Blob
             );
-            zip.file(`atlas/atlas-${i}.json`, JSON.stringify({ frames: data, meta: atlasMeta }), COMPRESSION_PARAMETER);
+            zip.file(`atlas/atlas-${i}.json`, JSON.stringify({ frames: data, meta: atlasMeta }));
           }
         }
         
