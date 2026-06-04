@@ -12,7 +12,7 @@ import { buildAtlas } from 'utils/buildAtlas';
 
 const packagingProgressAtom = atom(0);
 
-const COMPRESSION_PARAMETER =  { binary: true, compression: 'STORE' };
+const COMPRESSION_PARAMETER = { binary: true, compression: 'STORE' } as const;
 
 const atlasMeta = {
 	"app": "https://basis.dev.jibencaozuo.com/",
